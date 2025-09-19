@@ -1,4 +1,11 @@
 {
+  "installCommand": "npm install",
+  "buildCommand": "npm run build",
+  "build": {
+    "env": {
+      "NPM_CONFIG_PRODUCTION": "false"
+    }
+  },
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]

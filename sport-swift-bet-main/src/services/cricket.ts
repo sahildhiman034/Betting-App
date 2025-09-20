@@ -70,88 +70,62 @@ export const formatTime = (epochMs: number) =>
     timeZone: TZ,
   }).format(new Date(epochMs));
 
-// Fetch live matches (best-effort across common endpoints)
+// Fetch live matches (DISABLED - returns mock data)
 export const fetchLiveMatches = async (): Promise<CricketMatch[]> => {
-  try {
-    // Attempt 1: /matches/list?matchState=live (common in cricbuzz-based APIs)
-    const data: any = await rapidGet({ path: "/matches/list", query: { matchState: "live" } });
-    const matches: CricketMatch[] = (data?.matches || data?.typeMatches || [])
-      .flatMap((tm: any) => tm?.seriesMatches || [])
-      .flatMap((sm: any) => sm?.seriesAdWrapper?.matches || [])
-      .map((m: any) => ({
-        id: String(m?.matchInfo?.matchId ?? m?.id ?? Math.random()),
-        series: m?.matchInfo?.seriesName,
-        teamA: m?.matchInfo?.team1?.teamSName ?? m?.teamA ?? "T1",
-        teamB: m?.matchInfo?.team2?.teamSName ?? m?.teamB ?? "T2",
-        startTime: safeNum(m?.matchInfo?.startDate) ?? Date.now(),
-        state: "live",
-        scoreA: m?.matchScore?.team1Score?.inngs1?.score ? `${m.matchScore.team1Score.inngs1.score}/${m.matchScore.team1Score.inngs1.wickets}` : undefined,
-        scoreB: m?.matchScore?.team2Score?.inngs1?.score ? `${m.matchScore.team2Score.inngs1.score}/${m.matchScore.team2Score.inngs1.wickets}` : undefined,
-        overs: m?.matchScore?.team1Score?.inngs1?.overs ?? m?.matchScore?.team2Score?.inngs1?.overs,
-        wicketsA: safeNum(m?.matchScore?.team1Score?.inngs1?.wickets),
-        wicketsB: safeNum(m?.matchScore?.team2Score?.inngs1?.wickets),
-      })) as CricketMatch[];
-    if (matches.length) return matches;
-  } catch (_) {
-    // ignore and try alternative endpoint
-  }
-
-  try {
-    // Attempt 2: /match/live (some variants)
-    const data: any = await rapidGet({ path: "/match/live" });
-    const matches: CricketMatch[] = (data?.data || data || []).map((m: any) => ({
-      id: String(m?.matchId ?? m?.id ?? Math.random()),
-      series: m?.seriesName,
-      teamA: m?.teamA?.name ?? m?.team1?.name ?? "T1",
-      teamB: m?.teamB?.name ?? m?.team2?.name ?? "T2",
-      startTime: safeNum(m?.startTime) ?? Date.now(),
+  // Live cricket feature disabled - returning mock data
+  return [
+    {
+      id: "mock-1",
+      series: "Demo Series",
+      teamA: "Team A",
+      teamB: "Team B", 
+      startTime: Date.now(),
       state: "live",
-      scoreA: m?.scoreA ?? m?.team1Score,
-      scoreB: m?.scoreB ?? m?.team2Score,
-      overs: m?.overs,
-    }));
-    return matches;
-  } catch (e) {
-    return [];
-  }
+      scoreA: "120/3",
+      scoreB: "95/2",
+      overs: "15.2",
+      wicketsA: 3,
+      wicketsB: 2,
+    }
+  ];
 };
 
 export const fetchUpcomingMatches = async (days = 10): Promise<CricketMatch[]> => {
-  try {
-    const from = Date.now();
-    const to = from + days * 24 * 60 * 60 * 1000;
-    const data: any = await rapidGet({ path: "/matches/list", query: { matchState: "upcoming" } });
-    const matches: CricketMatch[] = (data?.matches || data?.typeMatches || [])
-      .flatMap((tm: any) => tm?.seriesMatches || [])
-      .flatMap((sm: any) => sm?.seriesAdWrapper?.matches || [])
-      .map((m: any) => ({
-        id: String(m?.matchInfo?.matchId ?? m?.id ?? Math.random()),
-        series: m?.matchInfo?.seriesName,
-        teamA: m?.matchInfo?.team1?.teamSName ?? m?.teamA ?? "T1",
-        teamB: m?.matchInfo?.team2?.teamSName ?? m?.teamB ?? "T2",
-        startTime: safeNum(m?.matchInfo?.startDate) ?? Date.now(),
-        state: "upcoming",
-      }))
-      .filter((m: CricketMatch) => m.startTime >= from && m.startTime <= to);
-    return matches;
-  } catch (e) {
-    return [];
-  }
+  // Upcoming matches feature disabled - returning mock data
+  return [
+    {
+      id: "mock-upcoming-1",
+      series: "Demo Series",
+      teamA: "Team C",
+      teamB: "Team D",
+      startTime: Date.now() + 2 * 60 * 60 * 1000, // 2 hours from now
+      state: "upcoming",
+    },
+    {
+      id: "mock-upcoming-2", 
+      series: "Demo Series",
+      teamA: "Team E",
+      teamB: "Team F",
+      startTime: Date.now() + 24 * 60 * 60 * 1000, // 1 day from now
+      state: "upcoming",
+    }
+  ];
 };
 
 export const fetchMatchDetail = async (matchId: string): Promise<any> => {
-  try {
-    // Common patterns: /match/get-scorecard?matchId=xxxx or /scorecards/get?matchId=xxx
-    try {
-      const scorecard: any = await rapidGet({ path: "/match/get-scorecard", query: { matchId } });
-      return scorecard;
-    } catch (_) {
-      const alt: any = await rapidGet({ path: "/scorecards/get", query: { matchId } });
-      return alt;
-    }
-  } catch (e) {
-    return null;
-  }
+  // Match detail feature disabled - returning mock data
+  return {
+    matchId,
+    series: "Demo Series",
+    teamA: "Team A",
+    teamB: "Team B",
+    status: "Live",
+    score: {
+      teamA: "120/3 (15.2)",
+      teamB: "95/2 (12.0)"
+    },
+    message: "Live cricket API disabled - showing demo data"
+  };
 };
 
 
